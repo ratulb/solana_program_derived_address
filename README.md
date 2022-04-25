@@ -12,7 +12,7 @@ The project comprises of:
 * A rust [client](https://github.com/ratulb/solana_program_derived_address/blob/999604aead61e7a2c05ba42e027693e1fc4b2336/client/src/main.rs#L27) that that submits transactiion to the on-chain to do a SOL transfer from a PDA that is derived from the on-chain program's id.
 * A shared crate called [common](https://github.com/ratulb/solana_program_derived_address/blob/main/common/src/lib.rs) which exposes a struct called [InstructionData](https://github.com/ratulb/solana_program_derived_address/blob/999604aead61e7a2c05ba42e027693e1fc4b2336/common/src/lib.rs#L4) that carries instruction data from the client to deployed program.
 ## Table of Contents
-- [Counter program and client](#counter_program_and_client)
+- [On-chain program and client](#on-chain_program_and_client)
   - [Table of Contents](#table-of-contents)
   - [Quick Start](#quick-start)
     - [Configure CLI](#configure-cli)
