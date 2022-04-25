@@ -27,12 +27,7 @@ The project comprises of:
     - [Project structure](#project-structure)
 
   - [More about the client](#more-about-the-client)
-    - [Main function](#main-function)
-    - [Establish a connection to the cluster](#instantiates-the-client-that-wraps-up-an-underlying-rpcclient)
-    - [Setup an account to store counter program state](#setup-an-account-to-store-counter-program-state)
-    - [Check if the counter on-chain program has been deployed](#check-if-the-counter-on-chain-program-has-been-deployed)
-    - [Send a counter Increament transaction to the on-chain program](#send-a-counter-increament-transaction-to-the-on-chain-program)
-    - [Query the counter account](#query-the-counter-account)
+    
   - [More about the on-chain program](#more-about-the-on-chain-program)
     
 ## Quick Start
@@ -156,7 +151,7 @@ solana balance
 ```
 #### Request sol airdrop:
 ```bash
-solana airdrop 1
+solana airdrop 10
 ```
 
 #### Run the client:
@@ -186,7 +181,7 @@ The [main function](https://github.com/ratulb/solana_program_derived_address/blo
 #### Creates program derived address based on the on-chain program id and a seed
 Relevant code can be found [here](https://github.com/ratulb/solana_program_derived_address/blob/481f131e17531489e51980785b15c15424496749/client/src/main.rs#L35)
 
-#### Does a fund dposit(airdrop) to the PDA
+#### Does a fund airdrop to the PDA
 
 Relevant [code](https://github.com/ratulb/solana_program_derived_address/blob/481f131e17531489e51980785b15c15424496749/client/src/main.rs#L40).
 
