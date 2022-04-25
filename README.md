@@ -142,6 +142,7 @@ solana config set -ut
 
 solana program deploy target/deploy/program.so
 ```
+> **Note**: If deployed to devnet or testnet, we need to pass the `rpc_url` env variable to the client program accordinly!
 
 > **Note**: You may not have required SOL balance to deploy and run transactions in devnet or testnet. To request SOL into your account do an airdrop:
 
