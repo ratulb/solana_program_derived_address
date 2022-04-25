@@ -198,6 +198,10 @@ Relevant [code](https://github.com/ratulb/solana_program_derived_address/blob/48
 
 Relevant [code](https://github.com/ratulb/solana_program_derived_address/blob/24cd37bc14d1f01f78a82f4ee07de23c671513da/client/src/main.rs#L53)
 
+#### Prepares the AccountMeta structs that would be read/writen by the on-chain program and passed along to the system program as part of CPI invocation.
+
+Relevant [code](https://github.com/ratulb/solana_program_derived_address/blob/24cd37bc14d1f01f78a82f4ee07de23c671513da/client/src/main.rs#L60).
+
 On entry to the [account setup process](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L169), we retrieve the payer pubkey(i.e. pubkey from `~/.config/solana/id.json`), then look for the program id(pubkey from ./target/deploy/program-keypair.json). If the program has not been built - account set up would [fail](https://github.com/ratulb/solana_counter_program/blob/da583a9c8516a8cb69d0c32058f9a161e5a1280c/client/src/client.rs#L165) fast.
 
 Next, we construct the counter account pubkey based on payer pubkey, [seed](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L21) and the program id(owner of the account) and make a rpc call to the chain to retrieve the account. Successful retrieval of the account results in [early exit](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L184) from this call because required counter account already exists and we have nothing to setup.
