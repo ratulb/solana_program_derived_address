@@ -21,8 +21,8 @@ static PDA_SEED: &str = "PROGRAM";
 ///private key) each time we call this program. We fund(airdrop) the PDA with some SOL deposit
 ///so that we can transfer SOL out of the PDA account. But since the PDA has no private key
 ///associated with it - it can not authorize that transfer. Since PDA was derived based on
-///the program id - it has exclusive rights over the PDA account - the program can act as
-///signer on behalf of the PDA by invoking 'invoke_signed'.
+///the program id - the program has exclusive rights over the PDA account - the program
+///can act as signer on behalf of the PDA by invoking 'invoke_signed'.
 
 fn main() -> Result<(), Box<dyn Error>> {
     //Get the program keypair - this must have been generated during 'cargo build-bpf' command
@@ -47,14 +47,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     recipent_address.log();
     let balance = get_account_balance(&recipent_address, &client);
     println!("Account balance for recipient {}", balance);
-
-    //Create the instruction that needs to be encaptulated as part of the transaction message
-    //We are packing the seed used, bump_seed returned(as part find_program_address
-    //method invocation used above) and lamports to be transferred to the rabdom recipient
-    //as InstructionData struct and bytes from the InstructionData struct into 'data' field 
-    //of the instruction
-    //
-    //Lets transfer 1 SOL out of 2 SOLs deposited to PDA account
+    
+    //We would transfer 1 SOL out of 2 SOLs deposited to PDA account above
     let lamports_to_transfer = 2 * 1000000000 - 1 * 1000000000;
     let data = InstructionData::new(PDA_SEED, bump_seed, lamports_to_transfer);
 
@@ -75,7 +69,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         //on-chain program
         AccountMeta::new_readonly(solana_sdk::system_program::id(), false),
     ];
-
+    //Create the instruction that needs to be encaptulated as part of the transaction message
+    //We are packing the seed used, bump_seed returned(as part find_program_address
+    //method invocation used above) and lamports to be transferred to the rabdom recipient
+    //as InstructionData struct and bytes from the InstructionData struct into 'data' field 
+    //of the instruction
+    //
     let instruction = Instruction::new_with_bytes(program_id, &data.as_bytes(), accounts);
     //Get the latest blockhash
     let blockhash = get_lastest_blockhash(&client);
