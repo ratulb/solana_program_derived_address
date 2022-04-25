@@ -40,7 +40,7 @@ The project comprises of:
 The following dependencies are required to build and run this example:
 
 - Install Rust v1.60.0 or later from https://rustup.rs/
-- Install Solana v1.10.8 or later from
+- Install Solana v1.10.9 or later from
   https://docs.solana.com/cli/install-solana-cli-tools
 
 If this is your first time using Rust, these [Installation
@@ -91,10 +91,10 @@ solana logs
 
 ### Build the on-chain program
 
-Go inside the 'solana_counter_program' directory if not already done:
+Go inside the 'solana_program_derived_address' directory if not already done:
 
 ```bash
-cd solana_counter_program
+cd solana_program_derived_address
 
 cargo build-bpf
 ```
@@ -115,14 +115,15 @@ cargo run
 Values will differ!
 
 ```bash
-Connecting to cluster...http://localhost:8899
-Connection to cluster established
-Cluster node solana version 1.10.5
-Counter account B6rWFbQ4pmb4pvcZstFCjLXffZSaqqn6c8fdXzpK3WSX already exists. Owner program: HGsPi7r4MEeUSC74vzx9qCqJvuuBb3AcjNc5MrtEjCGu
-Binary address 8cRrhLjJ7sSbSa1kuaShq2Ywu1otyRhkNwTQ3E1Bqr4T
-Fee for message 5000
-Counter value 1
-
+The program address: 9rmCVEicv13Yvvsf9jxfFDN32qLmuASgPMtyDq44nGjZ
+The program derived address: DuViEkGrA6FtsdX7TX85A94Q1VdVYMSgHZ6fYDHo2Vt2
+Current account balance for address DuViEkGrA6FtsdX7TX85A94Q1VdVYMSgHZ6fYDHo2Vt2 is 0
+Post funding account balance for address DuViEkGrA6FtsdX7TX85A94Q1VdVYMSgHZ6fYDHo2Vt2 is 20000
+00000
+The recipient address: 28qBD3umyZsx7rejtPKxcWpdtoiY4ieTkCpo4XrWMiqL
+Account balance for recipient 0
+Transfer transaction submitted
+Recipient account balance post transfer 1000000000
 ```
 
 #### Not seeing the expected output?
@@ -166,22 +167,16 @@ cargo run
 ### Project structure
 
 The following image shows the project layout. We are making use of cargo [workspaces](https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html).
-- [program](https://github.com/ratulb/solana_counter_program/tree/main/program) - this is the on-chain counter program
-- [client](https://github.com/ratulb/solana_counter_program/tree/main/client) - this is the rust client program that invokes the program to increament the counter.
-- [common](https://github.com/ratulb/solana_counter_program/tree/main/common) - this crate contains the enum/structs shared by both program and client.
-
-<p align="left">
-  <a href="#project_structure">
-    <img alt="Project structure" src="solana_counter_program.png" width="350" height="100"/>
-  </a>
-</p>
+- [program](https://github.com/ratulb/solana_program_derived_address/tree/main/program) - this is the on-chain program that does a cross program invocation
+- [client](https://github.com/ratulb/solana_program_derived_address/tree/main/client) - this is the rust client program that invokes the on-chain program to do a SOL transfer from PDA to a random recipient account.
+- [common](https://github.com/ratulb/solana_program_derived_address/tree/main/common) - this crate contains the `InstructionData` serde serializable/deserializable struct used by both client and the on-chain program.
 
 For experimentation, tweaking files under the program folder would require [rebuild](#build-the-on-chain-program) and [redeployment](#deploy-the-on-chain-program-locally).
 
 Now when you rerun `cargo run`, you should see the results of your changes.
 ## More about the client
 
-The client is a rust cli [program](https://github.com/ratulb/solana_counter_program/blob/main/client/src/main.rs) with a main function.
+The client is a rust cli [program](https://github.com/ratulb/solana_program_derived_address/blob/main/client/src/main.rs) with a main function.
 
 #### Main function
 
