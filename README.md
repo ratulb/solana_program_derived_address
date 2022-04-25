@@ -1,4 +1,4 @@
-# Rust counter program and client on solana
+# Solana program derived address(PDA) in action
 
 This project demonstrates how to use solana rust APIs to write a counter program and client in rust.
 
