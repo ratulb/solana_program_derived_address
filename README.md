@@ -211,46 +211,6 @@ Relevant [code](https://github.com/ratulb/solana_program_derived_address/blob/24
 Relevant [code](https://github.com/ratulb/solana_program_derived_address/blob/24cd37bc14d1f01f78a82f4ee07de23c671513da/client/src/main.rs#L91)
 
 
-
-### Check if the counter on-chain program has been deployed
-
-Deployment [verification](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L255) starts by checking for the existence [program keypair](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L24) that must have been generated at the [program build phase](#build-the-on-chain-program). If [keypair](https://docs.rs/solana-sdk/latest/solana_sdk/signer/keypair/index.html) can not be found - the program exits with appropriate error message.
-We try to retrieve the program account corresponding to the [pubkey](https://docs.rs/solana-sdk/latest/solana_sdk/pubkey/struct.Pubkey.html) of the program keypair - here the intent being two pronged - to verify that the program has been deployed to the chain and it, indeed, is executable.
-Now here is a catch - we can load the program account and check for [executable](https://github.com/solana-labs/solana/blob/77182fcdda510154ed1194e0188ede80c64e7907/sdk/src/account.rs#L31) flag on it and decide whether to proceed further or not. But this alone is not sufficient - because programs owned by the [upgradable bpf loader](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L261) maybe closed(`solana program close program_id`) - and it will still report the program as being executable.
-
-This is not the case with [bpf loader](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L263) - It does not allow closing a deployed program.
-
-Programs owned by upgradable loader store their executable bits in a seprate account which can be seen below:
-<p align="left">
-  <a href="#">
-    <img alt="Program" src="step1.png" width="500" height="300"/>
-  </a>
-</p>
-
-We can query the program data account (underlined red in the image) and it will spit out a huge pile of hexadecimal numbers. When we close a program - it is this program data account that gets wiped out - but program account still says it is executable - which is not very helpful. That is why we try to retrieve the program data account where actual program byte codes are stored - in the case that program is owned by upgradeable bpf loader and deployed on-chain program may have been closed.
-
-> **Note**: `solana program deploy program.so` - deployes to upgradable loader and `solana deploy program.so` - deploys to bpf loader. Programs owned by bpf loader are are not upgradeable and store progrm byte code in the program account itself.
-
-### Send a counter Increament transaction to the on-chain program
-
-[Here](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L319) we submit a transaction to our on-chain counter program to increament the counter value that is maintained in its owned account.
-
-Usual steps like loading payer keypair, program id, querying for latest blockhash and fee for message etc happen in appropriate places - but one thing to note here is that we are packing an enum defined [here](https://github.com/ratulb/solana_counter_program/blob/421d7cfb80fab2a02b0982f03d2a47356e7eadfe/common/src/instruction.rs#L4) with the [instruction](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L329).
-To invoke a solana on-chain program - we send a Transaction, which contains a message and the [message](https://github.com/solana-labs/solana/blob/d71986cecf062e2bbbe291e018bf0a4c33e192a5/sdk/program/src/message/versions/v0/mod.rs#L54) encaptulates one or more [instructions](https://github.com/solana-labs/solana/blob/d71986cecf062e2bbbe291e018bf0a4c33e192a5/sdk/program/src/instruction.rs#L324) within it. We see that `instruction` construct has a [data](https://github.com/solana-labs/solana/blob/d71986cecf062e2bbbe291e018bf0a4c33e192a5/sdk/program/src/instruction.rs#L333) field within it - which is a [Vec](https://doc.rust-lang.org/std/vec/struct.Vec.html) of bytes. We can send any data specific to our program so long as the program knows how to deserialize and handle it - solana runtime is [agnostic](https://github.com/solana-labs/solana/blob/d71986cecf062e2bbbe291e018bf0a4c33e192a5/sdk/program/src/instruction.rs#L277) about the format of data that an instruction carries but it exposes useful APIs for constructing `instructions` from both [borsh](https://github.com/solana-labs/solana/blob/d71986cecf062e2bbbe291e018bf0a4c33e192a5/sdk/program/src/instruction.rs#L383) and [bincode](https://github.com/solana-labs/solana/blob/d71986cecf062e2bbbe291e018bf0a4c33e192a5/sdk/program/src/instruction.rs#L435) serializable types. [Borsh](https://borsh.io/) is preferred because of its stable specification. [Bincode](https://github.com/bincode-org/bincode) is mentioned as being computationally expensive and not to have had a published spec in solana documentations but now bincode encoding spec can be found [here](https://github.com/bincode-org/bincode/blob/trunk/docs/spec.md).
-
-As said - solana runtime does not care what data we pack inside an instruction as long as our on-chain program is able to deserialize and decipher it. It is not mandatory to use borsh or bincode - we can,very well, invent our own serialization mechanism if we want and make use of [this](https://github.com/solana-labs/solana/blob/d71986cecf062e2bbbe291e018bf0a4c33e192a5/sdk/program/src/instruction.rs#L492) API to construct an instruction, embed it in a message, submit a transaction that carries the message to the network. During execution, solana runtime will faithfully make available the [packed data](https://github.com/solana-labs/solana/blob/d71986cecf062e2bbbe291e018bf0a4c33e192a5/sdk/program/src/instruction.rs#L333) in the instruction to the [program](https://github.com/solana-labs/solana/blob/d71986cecf062e2bbbe291e018bf0a4c33e192a5/sdk/program/src/instruction.rs#L327) that the instruction was created for - in the form of [byte array](https://github.com/ratulb/solana_counter_program/blob/dbbb8839b1e6940ab227065a654156b0484228cd/program/src/entrypoint.rs#L12).
-
-In any case, we did not wnat to re-invent the wheel instead use borsh serialization and deserialization [here](https://github.com/ratulb/solana_counter_program/blob/dbbb8839b1e6940ab227065a654156b0484228cd/common/src/state.rs#L3) and [here](https://github.com/ratulb/solana_counter_program/blob/dbbb8839b1e6940ab227065a654156b0484228cd/common/src/instruction.rs#L3).
-We pack our application specific custom data(which is an enum with just one variant) [here](https://github.com/ratulb/solana_counter_program/blob/dbbb8839b1e6940ab227065a654156b0484228cd/client/src/client.rs#L301) and solana runtime makes that data available to our program [here](https://github.com/ratulb/solana_counter_program/blob/dbbb8839b1e6940ab227065a654156b0484228cd/program/src/entrypoint.rs#L12) and we reconstruct our enum variant [here](https://github.com/ratulb/solana_counter_program/blob/dbbb8839b1e6940ab227065a654156b0484228cd/program/src/processor.rs#L20).
-Its also mandatory that we pass along [accounts](https://github.com/solana-labs/solana/blob/5c7060eaeb384cdff4db9299ecbf52d446110859/sdk/program/src/instruction.rs#L330) that our program reads or modifies during its execution. Our program increaments the counter value in the counter account that it owns. Hence we [pass](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L330) that information in a [AccountMeta](https://github.com/solana-labs/solana/blob/5c7060eaeb384cdff4db9299ecbf52d446110859/sdk/program/src/instruction.rs#L533) struct marking that as writable. Passing accounts that an on-chain program touches during its execution lets solana runtime parallelize transactions leading to faster execution time. 
-
-> **Note**: This [line](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L338) is commented out. Its clones the instruction and packs it twice inside the message. What will happen if we uncomment this line and comment out the above line? Check that out!
-
-### Query the counter account
-
-Each time we run our client program - it [increaments](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L319) the [count field inside the counter account](https://github.com/ratulb/solana_counter_program/blob/2768076d9c576230a320327c48665f270dbbb4a2/program/src/processor.rs#L24-L30) owned by our on-chain program.
-We load the counter account [here](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L362-L377) - deserialize the data field of the account into Counter struct and print out the count fields value.
-
 ## More about the on-chain program
 
 To write an on-chain solana program - primarily we need to follow these steps:
