@@ -15,12 +15,12 @@ impl InstructionData {
             lamports,
         }
     }
-
+    //For sending InstructionData as bytes from the client
     pub fn as_bytes(&self) -> Vec<u8> {
         let serialized = serde_json::to_string(self).expect("Failed serialization");
         serialized.as_bytes().to_vec()
     }
-
+    //For construction of InstructionData om the on-chain program
     pub fn from_bytes(bytes: &[u8]) -> Self {
         let deserialized = String::from_utf8(bytes.to_vec()).expect("Failed to convert!");
         let deserialized: Self =

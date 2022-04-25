@@ -49,12 +49,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("Account balance for recipient {}", balance);
 
     //Create the instruction that needs to be encaptulated as part of the transaction message
-    //We are packing the seed used and bump_seed returned(as part find_program_address
-    //method invocation used above) into the instrcution's data field
-
-    //First create the data field
-    let mut data = PDA_SEED.as_bytes().to_vec();
-    data.push(bump_seed);
+    //We are packing the seed used, bump_seed returned(as part find_program_address
+    //method invocation used above) and lamports to be transferred to the rabdom recipient
+    //as InstructionData struct and bytes from the InstructionData struct into 'data' field 
+    //of the instruction
+    //
+    //Lets transfer 1 SOL out of 2 SOLs deposited to PDA account
     let lamports_to_transfer = 2 * 1000000000 - 1 * 1000000000;
     let data = InstructionData::new(PDA_SEED, bump_seed, lamports_to_transfer);
 
@@ -71,6 +71,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         AccountMeta::new(pda, false),
         //Not a signer, writable true
         AccountMeta::new(recipent_address, false),
+        //We need to make 'system_program' also make available as AccountInfo in our
+        //on-chain program
         AccountMeta::new_readonly(solana_sdk::system_program::id(), false),
     ];
 
