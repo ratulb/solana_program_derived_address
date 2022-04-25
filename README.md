@@ -180,30 +180,21 @@ The client is a rust cli [program](https://github.com/ratulb/solana_program_deri
 
 #### Main function
 
-The [main function](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/main.rs#L5) does following five things:
+The [main function](https://github.com/ratulb/solana_program_derived_address/blob/481f131e17531489e51980785b15c15424496749/client/src/main.rs#L27) does following things:
 
 
-#### Instantiates the client that wraps up an underlying RpcClient
+#### Creates program derived address based on the on-chain program id and a seed
+Relevant code can be found [here](https://github.com/ratulb/solana_program_derived_address/blob/481f131e17531489e51980785b15c15424496749/client/src/main.rs#L35)
 
-[Client](https://github.com/ratulb/solana_counter_program/blob/main/client/src/client.rs)
-creates an instance of [RpcClient](https://docs.rs/solana-client/latest/solana_client/rpc_client/struct.RpcClient.html) in its [get_rpc_client](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L44) methhod. This sets up a Http client to the solana network that is picked up from `~/.config/solana/cli/config.yml`. Once the client has been setup - we can start interacting with solana network for things like querying about accounts, sending transactions, getting cluster related information and much more. The exhaustive list can be found [here](https://docs.rs/solana-client/latest/solana_client/rpc_client/struct.RpcClient.html#implementations).
+#### Does a fund dposit(airdrop) to the PDA
 
-The `json_rpc_url` entry in the `config.yaml(/.config/solana/cli/config.yml)` file gets configured via the following command:
-```bash
-solana config set --url localhost[devnet, testnet etc]
-```
+Relevant [code](https://github.com/ratulb/solana_program_derived_address/blob/481f131e17531489e51980785b15c15424496749/client/src/main.rs#L40).
 
-#### Setup an account to store counter program state
+#### Creates a random recipient address
 
-Solana on-chain programs are stateless and immutable(which is different from upgradable - we can keep modifying and deploying a program again and again so long as we don't supply the `--final` flag to `solana program deploy program.so` or don't use `solana deploy program.so` - which sets up 'BPFLoader2111111111111111111111111111111111' as program owner instead of `BPFLoaderUpgradeab1e11111111111111111111111` and does not allow us to upgrade the program further unless we specify different program address). Also, looking at the program [crate_type](https://github.com/ratulb/solana_counter_program/blob/0684cbf58aa497de85a6625caf773ac985a808dd/program/Cargo.toml#L16), we see that `crate-type` is "cdylib", "lib". We can ommit the "lib" type that would work just fine. "cdylib" produces a .so file in linux and .dll file in windows. These are shared libraries - they do not maintain state across invocations! Where then we store state in solana? In accounts. If a program in solana wants to persist state, it would have to make use of accounts that it owns.
-
-Also, programs themselves are stored in accounts - they are marked as executable. For more information about account see [here](https://docs.rs/solana-sdk/latest/src/solana_sdk/account.rs.html#22-34).
+Relevant [code](https://github.com/ratulb/solana_program_derived_address/blob/481f131e17531489e51980785b15c15424496749/client/src/main.rs#L43).
 
 
-> **Note**: There is limit to how much storage space(currently 10MB) an account can have. Space incurs cost. Incurred cost is paid via rent. An account can be rent exempt if it maintains atleast two years worth of rent as balance in its account. See more [here](https://docs.solana.com/developing/programming-model/accounts). On-chain programs are expected to be rent exempt otherwise they would be purged from the chain. Amount of lamports required for an account to be rent exempt can be calculated [programmatically](https://docs.rs/solana-client/latest/src/solana_client/rpc_client.rs.html#3531-3536) or via the cli as shown:
-```bash
-solana rent 1000 [in bytes]
-```
 On entry to the [account setup process](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L169), we retrieve the payer pubkey(i.e. pubkey from `~/.config/solana/id.json`), then look for the program id(pubkey from ./target/deploy/program-keypair.json). If the program has not been built - account set up would [fail](https://github.com/ratulb/solana_counter_program/blob/da583a9c8516a8cb69d0c32058f9a161e5a1280c/client/src/client.rs#L165) fast.
 
 Next, we construct the counter account pubkey based on payer pubkey, [seed](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L21) and the program id(owner of the account) and make a rpc call to the chain to retrieve the account. Successful retrieval of the account results in [early exit](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L184) from this call because required counter account already exists and we have nothing to setup.
