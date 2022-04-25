@@ -194,6 +194,9 @@ Relevant [code](https://github.com/ratulb/solana_program_derived_address/blob/48
 
 Relevant [code](https://github.com/ratulb/solana_program_derived_address/blob/481f131e17531489e51980785b15c15424496749/client/src/main.rs#L43).
 
+#### Populates the InstructionMeta struct that would be sent accross to the on-chain program
+
+Relevant [code](https://github.com/ratulb/solana_program_derived_address/blob/24cd37bc14d1f01f78a82f4ee07de23c671513da/client/src/main.rs#L53)
 
 On entry to the [account setup process](https://github.com/ratulb/solana_counter_program/blob/97d463aecc7d21b138b95cd53bdd3e2d951ba663/client/src/client.rs#L169), we retrieve the payer pubkey(i.e. pubkey from `~/.config/solana/id.json`), then look for the program id(pubkey from ./target/deploy/program-keypair.json). If the program has not been built - account set up would [fail](https://github.com/ratulb/solana_counter_program/blob/da583a9c8516a8cb69d0c32058f9a161e5a1280c/client/src/client.rs#L165) fast.
 
