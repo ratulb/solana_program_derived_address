@@ -1,6 +1,8 @@
 # Solana program derived address(PDA) in action
 
-This project demonstrates how to make use of PDA(more [here](https://docs.solana.com/developing/programming-model/calling-between-programs#program-derived-addresses) and [here](https://github.com/solana-labs/solana/blob/70d57245b4ffaeec35a931db25282c5c35fe0be3/sdk/program/src/pubkey.rs#L456))s in solana via an on-chain program and a rust cleint program that invokes the program. 
+This project demonstrates how to make use of PDA(more [here](https://docs.solana.com/developing/programming-model/calling-between-programs#program-derived-addresses) and [here](https://github.com/solana-labs/solana/blob/70d57245b4ffaeec35a931db25282c5c35fe0be3/sdk/program/src/pubkey.rs#L456))s in solana via an on-chain program and a rust cleint program that invokes the program.
+
+We find an program derived address and its corresponding bump seed from the deployed program's id and a seed("PROGRAM"), fund the PDA with some SOL. We transfer SOL from the PDA to a randomly generated keypair. PDAs do not have private keys and they can not authorize(sign) the transfer. Hence we submit the transaction to on-chain program, which does a cross program invocation(CPI) to the system program. System program does the actual transfer while our on-chain program acts on the behalf of PDA assuming the role of PDA's signer.
 
 The project comprises of:
 
