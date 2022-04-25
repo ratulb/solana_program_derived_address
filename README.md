@@ -1,6 +1,6 @@
 # Solana program derived address(PDA) in action
 
-This project demonstrates how to use solana rust APIs to write a counter program and client in rust.
+This project demonstrates how to make use of PDA(more [here](https://docs.solana.com/developing/programming-model/calling-between-programs#program-derived-addresses) and [here](https://github.com/solana-labs/solana/blob/70d57245b4ffaeec35a931db25282c5c35fe0be3/sdk/program/src/pubkey.rs#L456))s in solana via an on-chain program and a rust cleint program that invokes the program. 
 
 The project comprises of:
 
